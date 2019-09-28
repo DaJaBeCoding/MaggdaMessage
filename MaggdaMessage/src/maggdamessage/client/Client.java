@@ -6,6 +6,8 @@
 package maggdamessage.client;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -21,38 +23,57 @@ import maggdamessage.MaggdaMessage;
  * @author DavidPrivat
  */
 public class Client extends Application {
-    
+
     private ClientScene scene;
+
     @Override
     public void start(Stage primaryStage) {
         MaggdaMessage.setClient(this);
         System.out.println("[Client] Client starting...");
 
-        
         scene = new ClientScene();
-        
+
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
         System.out.println("[Client] Client started.");
-        primaryStage.setOnCloseRequest((WindowEvent e)->{
-            scene.getConnectionPanes().forEach((ConnectionsOverviewPane pane)->{
-                pane.getConnector().closeConnections();
-            });
-            MaggdaMessage.clientClosing();
+        primaryStage.setOnCloseRequest((WindowEvent e) -> {
+            end();
         });
-        
+
+    }
+
+    public void end() {
+        System.out.println("[Client] Close request!");
+        scene.getConnectionPanes().forEach((ConnectionsOverviewPane pane) -> {
+            pane.getConnector().closeConnections();
+        });
+        MaggdaMessage.clientClosing();
+    }
+
+    public void updateConnectionName(String ip, String newName) {
+        findConnection(ip).forEach((Connection connection)->{
+            connection.setConnectionName(newName);
+        });
     }
     
-    public void updateConnectionName (String ip, String newName) {
-        scene.getConnectionPanes().forEach((ConnectionsOverviewPane pane)->{
-            pane.getConnector().getConnections().forEach((Connection connection)->{
-                if(connection.getIpAdress().equals(ip)) {
-                    connection.setConnectionName(newName);
+    public void removeConnection(String ip) {
+        findConnection(ip).forEach((Connection connection)->{
+            connection.deactivate();
+        });
+    }
+    
+    private ObservableList<Connection> findConnection (String ip) {
+        ObservableList<Connection> retConnections = FXCollections.observableArrayList();
+        scene.getConnectionPanes().forEach((ConnectionsOverviewPane pane) -> {
+            pane.getConnector().getConnections().forEach((Connection connection) -> {
+                if (connection.getIpAdress().equals(ip)) {
+                    retConnections.add(connection);
                 }
             });
         });
+        return retConnections;
     }
 
     /**
@@ -61,5 +82,5 @@ public class Client extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }

@@ -128,6 +128,7 @@ public class Connection extends Thread {
 
     }
     public void close() throws IOException {
+        sendCommand(new Command(Command.CommandType.LOGOUT, new String[]{}));
         running = false;
         socket.close();
     }
@@ -135,6 +136,14 @@ public class Connection extends Thread {
     public void setConnectionName(String name) {
         Platform.runLater(()->{
             connectionLabel.setText(name);
+            connectionLabel.setSuccessfull(true);
+        });
+    }
+    
+    public void deactivate() {
+        Platform.runLater(()->{
+            connectionLabel.setText("Disconnected");
+            connectionLabel.setSuccessfull(false);
         });
     }
     

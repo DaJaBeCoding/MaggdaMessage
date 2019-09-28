@@ -18,7 +18,8 @@ public class Command {
     public enum CommandType {
 
         PING, // args: 1) username
-        PONG;   // args: 1) username
+        PONG,   // args: 1) username
+        LOGOUT; // args: -
     }
 
     private String[] args;

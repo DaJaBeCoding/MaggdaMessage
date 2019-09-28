@@ -47,6 +47,8 @@ public class CommandsHandler {
                     case PING:
                         handlePING(currCommand);
                         break;
+                    case LOGOUT:
+                        handleLogout();
                 }
 
             } catch (Exception ex) {
@@ -62,6 +64,12 @@ public class CommandsHandler {
         sendCommand(new Command(Command.CommandType.PONG, new String[]{System.getProperty("user.name")}));
         if (Server.isLocalClient()) {
             maggdamessage.MaggdaMessage.getClient().updateConnectionName(connectedClientIp, pingCommand.getArgs()[0]);
+        }
+    }
+    
+    private void handleLogout() {
+        if (Server.isLocalClient()) {
+            maggdamessage.MaggdaMessage.getClient().removeConnection(connectedClientIp);
         }
     }
 
