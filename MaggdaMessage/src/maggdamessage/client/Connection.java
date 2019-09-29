@@ -67,8 +67,7 @@ public class Connection extends Thread {
         }
 
         try {
-            socket = new Socket();
-            socket.connect(new InetSocketAddress(ipAdress, MaggdaMessage.port), 50);
+            socket = new Socket(ipAdress, MaggdaMessage.port);
             activate();               // If it reachs this point: SUCCESS!
 
             try {
