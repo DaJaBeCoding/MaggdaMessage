@@ -38,12 +38,14 @@ public class Connection extends Thread {
     private DataInputStream input;
 
     private boolean running;
+    private boolean connected;
     
     private Chat chat;
 
     public Connection(String ip) {
         name = null;
         ipAdress = ip;
+        connected = false;
         
         if (ip != null) {
             connectionLabel = new ConnectionLabel("unknown");
@@ -60,12 +62,13 @@ public class Connection extends Thread {
 
     public boolean connect() {
         if (ipAdress == null || ipAdress.equals("")) {
+            connected = false;
             return false;
         }
 
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress(ipAdress, MaggdaMessage.port),5);
+            socket.connect(new InetSocketAddress(ipAdress, MaggdaMessage.port), 50);
             activate();               // If it reachs this point: SUCCESS!
 
             try {
@@ -81,11 +84,12 @@ public class Connection extends Thread {
             }
 
             chat = new Chat("Anonym", output);
-            
+            connected = true;
             return true;
 
         } catch (IOException ex) {
             deactivate();
+            connected = false;
             return false;
         }
 
@@ -147,6 +151,9 @@ public class Connection extends Thread {
     }
 
     public void setConnectionName(String name) {
+        if(!connected) {
+            connect();
+        }
         Platform.runLater(() -> {
             connectionLabel.setText(name);
             activate();
