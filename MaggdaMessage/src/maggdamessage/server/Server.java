@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,10 +54,13 @@ public class Server extends Thread {
                 clientSockets.put(socketId, clientSocket);
                 System.out.println("[Server] Added new Socket successfully! Port: " + MaggdaMessage.port + ", id: " + socketId);
 
-            } catch (Exception e) {
+            } catch (SocketException e) {
+                System.out.println("[Server] Server main Socket closed!");
+            } catch (IOException e) {
                 e.printStackTrace();
-            }
+            } 
         }
+        System.out.println("[Server] Server loop ended.");
     }
     
     public void setClient(Client c) {
@@ -75,5 +79,15 @@ public class Server extends Thread {
     
     public static boolean isLocalClient() {
         return isLocalClient;
+    }
+    
+    public void end() {
+        clientSockets.forEach((String id, ClientSocket socket)->{
+            socket.end();
+        });
+        System.out.println("[Server] Stopped all clientSockets.");
+        this.stop();
+         System.out.println("[Server] Server main thread closed!");
+        
     }
 }

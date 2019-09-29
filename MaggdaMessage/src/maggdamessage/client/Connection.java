@@ -13,12 +13,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import maggdamessage.MaggdaMessage;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import maggdamessage.Command;
 
 /**
@@ -35,10 +38,13 @@ public class Connection extends Thread {
     private DataInputStream input;
 
     private boolean running;
+    
+    private Chat chat;
 
     public Connection(String ip) {
         name = null;
         ipAdress = ip;
+        
         if (ip != null) {
             connectionLabel = new ConnectionLabel("unknown");
         } else {
@@ -58,8 +64,9 @@ public class Connection extends Thread {
         }
 
         try {
-            socket = new Socket(ipAdress, MaggdaMessage.port);
-            connectionLabel.setSuccessfull(true);                   // If it reachs this point: SUCCESS!
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(ipAdress, MaggdaMessage.port),5);
+            activate();               // If it reachs this point: SUCCESS!
 
             try {
                 output = new DataOutputStream(socket.getOutputStream());
@@ -73,10 +80,12 @@ public class Connection extends Thread {
                 e.printStackTrace();
             }
 
+            chat = new Chat("Anonym", output);
+            
             return true;
 
         } catch (IOException ex) {
-            connectionLabel.setSuccessfull(false);
+            deactivate();
             return false;
         }
 
@@ -90,7 +99,7 @@ public class Connection extends Thread {
     public void run() {
         String line = "";
         try {
-            while (((line = input.readUTF()) != null) && (running)) {
+            while ((running) && ((line = input.readUTF()) != null)) {
                 System.out.println("[Client] Command received: " + line);
                 try {
                     Command receivedCommand = new Command(line);
@@ -108,6 +117,8 @@ public class Connection extends Thread {
                     e.printStackTrace();
                 }
             }
+            System.out.println("[Client] ConnectionLoop stopped.");
+            socket.close();
             System.out.println("[Client] Connection stopped.");
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -127,28 +138,42 @@ public class Connection extends Thread {
         System.out.println("[Client] Command sent: " + commandAsString);
 
     }
+
     public void close() throws IOException {
         sendCommand(new Command(Command.CommandType.LOGOUT, new String[]{}));
         running = false;
-        socket.close();
+        System.out.println("[Client] Set running to false.");
+
     }
-    
+
     public void setConnectionName(String name) {
-        Platform.runLater(()->{
+        Platform.runLater(() -> {
             connectionLabel.setText(name);
-            connectionLabel.setSuccessfull(true);
+            activate();
+            chat.setPartnerName(name);
         });
     }
     
+    public void activate() {
+        connectionLabel.setSuccessfull(true);
+        connectionLabel.setOnMouseClicked((MouseEvent e)->{
+            Client.setNewRoot(chat);
+        });
+    }
+
     public void deactivate() {
-        Platform.runLater(()->{
+        Platform.runLater(() -> {
             connectionLabel.setText("Disconnected");
             connectionLabel.setSuccessfull(false);
         });
     }
-    
+
     public String getIpAdress() {
         return ipAdress;
+    }
+    
+    public Chat getChat() {
+        return chat;
     }
 
 }

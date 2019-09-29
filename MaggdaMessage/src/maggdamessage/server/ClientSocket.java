@@ -42,5 +42,9 @@ public class ClientSocket implements Runnable {
             ex.printStackTrace();
         }
     }
+    
+    public void end() {
+        commandsHandler.end();
+    }
 
 }

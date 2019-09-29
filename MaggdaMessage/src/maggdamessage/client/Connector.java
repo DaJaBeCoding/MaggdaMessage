@@ -45,11 +45,6 @@ public class Connector extends Thread {
             progressBar.setProgress((counter / ((double) connections.size())) * 0.5);
         }
 
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Connector.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
         counter = 0;
 

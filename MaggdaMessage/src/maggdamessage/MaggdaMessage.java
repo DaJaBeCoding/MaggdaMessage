@@ -24,12 +24,14 @@ public class MaggdaMessage {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
         try {
             server = new Server();
             server.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+                
 
         client = null;
         Client.main(null);
@@ -51,7 +53,7 @@ public class MaggdaMessage {
     }
     
     public static void clientClosing() {
-        
+        server.end();
     }
 
 }

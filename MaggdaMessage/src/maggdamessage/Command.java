@@ -19,7 +19,8 @@ public class Command {
 
         PING, // args: 1) username
         PONG,   // args: 1) username
-        LOGOUT; // args: -
+        LOGOUT, // args: -
+        MESSAGE; // args: 1) message
     }
 
     private String[] args;

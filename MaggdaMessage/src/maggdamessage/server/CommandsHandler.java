@@ -23,9 +23,11 @@ public class CommandsHandler {
     private DataInputStream input;
     private DataOutputStream output;
     private String connectedClientIp;
+    private Socket socket;
     private boolean running;
 
     public CommandsHandler(Socket socket) throws IOException {
+        this.socket = socket;
         output = new DataOutputStream(socket.getOutputStream());
         input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         connectedClientIp = socket.getInetAddress().getHostAddress();
@@ -39,7 +41,7 @@ public class CommandsHandler {
         String line = "";
         Command currCommand;
         System.out.println("[Server] CommandHandler now waiting...");
-        while (((line = input.readUTF()) != null) && (running)) {
+        while ((running) && ((line = input.readUTF()) != null)) {
             System.out.println("[Server] Command received: " + line);
             try {
                 currCommand = new Command(line);
@@ -49,6 +51,10 @@ public class CommandsHandler {
                         break;
                     case LOGOUT:
                         handleLogout();
+                        break;
+                    case MESSAGE:
+                        handleMessage(currCommand);
+                        break;
                 }
 
             } catch (Exception ex) {
@@ -56,6 +62,7 @@ public class CommandsHandler {
 
             }
         }
+        socket.close();
         System.out.println("[Server] CommandHandler closed.");
 
     }
@@ -72,11 +79,22 @@ public class CommandsHandler {
             maggdamessage.MaggdaMessage.getClient().removeConnection(connectedClientIp);
         }
     }
+    
+    private void handleMessage(Command messageCommand) {
+        String message = messageCommand.getArgs()[0];
+        if (Server.isLocalClient()) {
+            maggdamessage.MaggdaMessage.getClient().addMessage(connectedClientIp, message);
+        }
+    }
 
     public void sendCommand(Command c) throws IOException {
         String commandAsString = c.toString();
         output.writeUTF(commandAsString);
         System.out.println("[Server] Command sent: " + commandAsString);
 
+    }
+    
+    public void end() {
+        running = false;
     }
 }

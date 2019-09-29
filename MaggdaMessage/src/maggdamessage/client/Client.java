@@ -6,10 +6,12 @@
 package maggdamessage.client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
@@ -24,10 +26,12 @@ import maggdamessage.MaggdaMessage;
  */
 public class Client extends Application {
 
-    private ClientScene scene;
+    private static ClientScene scene;
+    private static Parent previousParent;
 
     @Override
     public void start(Stage primaryStage) {
+        previousParent = null;
         MaggdaMessage.setClient(this);
         System.out.println("[Client] Client starting...");
 
@@ -46,25 +50,34 @@ public class Client extends Application {
 
     public void end() {
         System.out.println("[Client] Close request!");
+        MaggdaMessage.clientClosing();
         scene.getConnectionPanes().forEach((ConnectionsOverviewPane pane) -> {
             pane.getConnector().closeConnections();
         });
-        MaggdaMessage.clientClosing();
+
     }
 
     public void updateConnectionName(String ip, String newName) {
-        findConnection(ip).forEach((Connection connection)->{
+        findConnection(ip).forEach((Connection connection) -> {
             connection.setConnectionName(newName);
         });
     }
-    
+
     public void removeConnection(String ip) {
-        findConnection(ip).forEach((Connection connection)->{
+        findConnection(ip).forEach((Connection connection) -> {
             connection.deactivate();
         });
     }
-    
-    private ObservableList<Connection> findConnection (String ip) {
+
+    public void addMessage(String ip, String message) {
+        Platform.runLater(() -> {
+            findConnection(ip).forEach((Connection connection) -> {
+                connection.getChat().addMessage(message, false);
+            });
+        });
+    }
+
+    private ObservableList<Connection> findConnection(String ip) {
         ObservableList<Connection> retConnections = FXCollections.observableArrayList();
         scene.getConnectionPanes().forEach((ConnectionsOverviewPane pane) -> {
             pane.getConnector().getConnections().forEach((Connection connection) -> {
@@ -81,6 +94,15 @@ public class Client extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void setNewRoot(Parent parent) {
+        previousParent = scene.getRoot();
+        scene.setRoot(parent);
+    }
+
+    public static void showPreviousScreen() {
+        scene.setRoot(previousParent);
     }
 
 }
