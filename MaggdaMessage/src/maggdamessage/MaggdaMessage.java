@@ -13,6 +13,8 @@ import maggdamessage.server.Server;
 /**
  *
  * @author DavidPrivat
+ * 
+ * update test 1
  */
 public class MaggdaMessage {
 

@@ -131,7 +131,7 @@ public class Connection extends Thread {
 
     public void handlePONG(Command pongCommand) {
         Platform.runLater(() -> {
-            connectionLabel.setText(pongCommand.getArgs()[0]);
+            setConnectionName(pongCommand.getArgs()[0]);
         });
 
     }
