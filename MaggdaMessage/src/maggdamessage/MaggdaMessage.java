@@ -20,7 +20,7 @@ public class MaggdaMessage {
 
     private static Server server;
     private static Client client;
-    public final static int port = 42666;
+    public final static int port = 25565;
 
     /**
      * @param args the command line arguments
