@@ -155,6 +155,9 @@ public class Connection extends Thread {
     }
     
     public void activate() {
+        if(chat == null) {
+            chat = new Chat(name, output);
+        }
         connectionLabel.setSuccessfull(true);
         connectionLabel.setOnMouseClicked((MouseEvent e)->{
             Client.setNewRoot(chat);
